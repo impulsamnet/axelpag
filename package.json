@@ -1,0 +1,17 @@
+{
+    "name": "impulsam-website",
+    "version": "1.0.0",
+    "description": "Impulsam website with Resend email integration",
+    "scripts": {
+        "start": "node server-local.js",
+        "dev": "nodemon server-local.js"
+    },
+    "dependencies": {
+        "dotenv": "^16.4.1",
+        "express": "^4.18.2",
+        "resend": "^3.1.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.9"
+    }
+}

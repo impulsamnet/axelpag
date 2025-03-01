@@ -8834,6 +8834,7 @@ html.rd-navbar-fixed-linked .page {
 	left: 19.5%;
 }
 
+/* Estilos para las tarjetas flip */
 .card-flip {
 	perspective: 1000px;
 	margin-bottom: 200px;
@@ -8844,8 +8845,6 @@ html.rd-navbar-fixed-linked .page {
   .card-flip .card-back {
 	width: 100%;
 	height: 200px;
-	background-color: #f8f8f8;
-	border: 1px solid #ddd;
 	border-radius: 10px;
 	backface-visibility: hidden;
 	transition: transform 0.6s;
@@ -8859,12 +8858,30 @@ html.rd-navbar-fixed-linked .page {
 	box-sizing: border-box;
   }
   
+  /* Cambio de colores - Invertidos */
   .card-flip .card-front {
 	z-index: 2;
+	background-color: #536b98; /* Color primario como fondo */
+	border: 1px solid #536b98;
+	color: #ffffff; /* Texto blanco para mejor contraste */
   }
   
   .card-flip .card-back {
 	transform: rotateY(180deg);
+	background-color: #f8f8f8; /* Mantiene el color original de fondo */
+	border: 1px solid #ddd;
+	color: #404044; /* Color del texto oscuro */
+  }
+  
+  /* Asegurarse de que el texto en la parte frontal sea blanco */
+  .card-flip .card-front p,
+  .card-flip .card-front strong {
+	color: #ffffff;
+  }
+  
+  /* Color del texto destacado en la parte frontal */
+  .card-flip .card-front .text-primary {
+	color: #ffffff !important; /* Forzar color blanco para el texto primario */
   }
   
   .card-flip:hover .card-front {
@@ -8874,14 +8891,81 @@ html.rd-navbar-fixed-linked .page {
   .card-flip:hover .card-back {
 	transform: rotateY(0deg);
   }
-  .card-container {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center; /* Centrar las tarjetas en la fila */
+  
+  .card-flip:hover .card-back {
+	transform: rotateY(0deg);
   }
+ 
+  
   
   .card-container .col-md-4 {
 	display: flex;
 	justify-content: center;
 	margin-bottom: 30px; /* Ajustar el margen inferior */
   }
+
+  /* Estilos para el texto decorativo de fondo en la sección de tarjetas */
+.custom-section {
+	position: relative;
+  }
+  
+  .decor-text-cards {
+	font-size: 180px;
+	transition: all ease .35s;
+	font-weight: 700;
+	letter-spacing: 15px;
+	text-shadow: 0 0px 10px rgba(0, 0, 0, 0.1);
+	font-family: "Poppins", sans-serif;
+	line-height: 1;
+	color: rgba(238, 242, 246, 0.7);
+	text-align: center;
+	text-transform: uppercase;
+	position: absolute;
+	z-index: -1;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	white-space: nowrap;
+	width: 100%;
+	pointer-events: none;
+  }
+  
+  @media (max-width: 991px) {
+	.decor-text-cards {
+	  font-size: 100px;
+	}
+  }
+  
+  @media (max-width: 576px) {
+	.decor-text-cards {
+	  font-size: 60px;
+	}
+  }
+  
+  /* Estilos para centrar las dos tarjetas inferiores */
+  .card-container {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+  }
+  
+  .card-row-last {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+	margin-top: 20px;
+  }
+  
+  .card-row-last .col-md-4 {
+	margin: 0 15px;
+  }
+  
+  /* Asegurarse de que cada tarjeta mantiene su tamaño */
+  .card-flip {
+	width: 100%;
+	max-width: 350px;
+	margin-left: auto;
+	margin-right: auto;
+  }
+
+  

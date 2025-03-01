@@ -182,50 +182,7 @@
     <div class="snackbars" id="form-output-global"></div>
     <script src="js/core.min.js"></script>
     <script src="js/script.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script type="text/javascript">
-      document.addEventListener('DOMContentLoaded', function() {
-        emailjs.init('Cs8R_7XlmerATSvsn');
-  
-        document.getElementById('contact-form').addEventListener('submit', function(event) {
-          event.preventDefault(); // Prevent the default form submission
-
-           // Verificar el captcha
-        var recaptchaResponse = grecaptcha.getResponse();
-        if (recaptchaResponse.length === 0) {
-          alert('Please complete the captcha.');
-          return;
-        }
-  
-          // Get form values
-          // var from_name = document.getElementById('from_name').value;
-          var nombre = document.getElementById('nombre').value;
-          var texto = document.getElementById('texto').value;
-          var telefono = document.getElementById('telefono').value;
-          var mail = document.getElementById('mail').value;
-          
-  
-          // Send email using EmailJS
-          emailjs.send("service_67gx3zg", "template_giewc6q", {
-            // from_name: from_name,
-            nombre: nombre,
-            texto: texto,
-            telefono: telefono,
-            mail: mail,
-            
-          })
-          .then(function(response) {
-            console.log('SUCCESS!', response.status, response.text);
-            // alert('Message sent successfully!');
-            window.location.href = "index.html";
-          }, function(error) {
-            console.log('FAILED...', error);
-            alert('Failed to send message. Please try again later.');  
-
-          });
-        });
-      });
+    <script src="js/contact-form.js"></script>
     </script>
   </body>
 </html>
