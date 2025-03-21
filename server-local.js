@@ -54,9 +54,3 @@ app.post('/api/send-email', async (req, res) => {
     return res.status(500).json({ error: 'Failed to send email' });
   }
 });
-
-// Start server
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-  console.log(`API endpoint available at http://localhost:${port}/api/send-email`);
-});
