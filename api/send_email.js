@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
     
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      from: 'Impulsam Website <onboarding@resend.dev>', // Update with your verified domain
+      from: 'Impulsam Website <noreply@impulsam.net>', // Update with your verified domain
       to: 'impulsamnet@gmail.com', // Your company email address
       subject: `New Contact from ${nombre}`,
       html: `
