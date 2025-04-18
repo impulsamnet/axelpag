@@ -23,36 +23,39 @@ module.exports = async (req, res) => {
 
   try {
     // Get request body
-    const { nombre, telefono, mail, texto } = req.body;
-    
+    const { nombre, telefono, mail, texto, recaptchaResponse } = req.body;
+
     // Validate required fields
     if (!nombre || !telefono || !mail || !texto) {
-      return res.status(400).json({ error: 'All fields are required' });
+      return res.status(400).json({ error: 'Todos los campos son requeridos' });
     }
-    
+
+    // Opcionalmente validar reCAPTCHA en el servidor
+    // Si deseas implementar esta validación, necesitarás hacer una petición a la API de reCAPTCHA
+
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      from: 'Impulsam Website <noreply@impulsam.net>', // Update with your verified domain
-      to: 'impulsamnet@gmail.com', // Your company email address
-      subject: `New Contact from ${nombre}`,
+      from: 'Impulsam Website <noreply@impulsam.net>', // Actualiza con tu dominio verificado
+      to: 'impulsamnet@gmail.com', // Tu dirección de correo electrónico
+      subject: `Nuevo contacto de ${nombre}`,
       html: `
-        <h2>New Contact Form Submission</h2>
-        <p><strong>Name:</strong> ${nombre}</p>
-        <p><strong>Phone:</strong> ${telefono}</p>
+        <h2>Nuevo mensaje desde el formulario de contacto</h2>
+        <p><strong>Nombre:</strong> ${nombre}</p>
+        <p><strong>Teléfono:</strong> ${telefono}</p>
         <p><strong>Email:</strong> ${mail}</p>
-        <p><strong>Message:</strong> ${texto}</p>
+        <p><strong>Mensaje:</strong> ${texto}</p>
       `,
       reply_to: mail
     });
 
     if (error) {
-      console.error('Resend API error:', error);
+      console.error('Error de API Resend:', error);
       return res.status(400).json({ error: error.message });
     }
 
     return res.status(200).json({ success: true, data });
   } catch (err) {
-    console.error('Server error:', err);
-    return res.status(500).json({ error: 'Failed to send email' });
+    console.error('Error del servidor:', err);
+    return res.status(500).json({ error: 'Error al enviar el email' });
   }
 };

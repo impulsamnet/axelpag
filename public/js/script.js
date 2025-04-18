@@ -1004,7 +1004,7 @@
 
 						form.find('input, textarea').trigger('blur');
 
-						setTimeout(function () {
+						setTimeout(function () {g
 							output.removeClass("active error success");
 							form.removeClass('success');
 						}, 3500);
