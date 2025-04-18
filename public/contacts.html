@@ -11,7 +11,19 @@
     <link rel="stylesheet" href="css/fonts.css">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    <style>.ie-panel{display: none;background: #212121;padding: 10px 0;box-shadow: 3px 3px 5px 0 rgba(0,0,0,.3);clear: both;text-align:center;position: relative;z-index: 1;} html.ie-10 .ie-panel, html.lt-ie-10 .ie-panel {display: block;}</style>
+    <style>
+      .ie-panel{display: none;background: #212121;padding: 10px 0;box-shadow: 3px 3px 5px 0 rgba(0,0,0,.3);clear: both;text-align:center;position: relative;z-index: 1;}
+      html.ie-10 .ie-panel, html.lt-ie-10 .ie-panel {display: block;}
+      .error-message {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+      }
+      .form-input.error {
+        border-color: #dc3545;
+      }
+    </style>
   </head>
   <body>
     <div class="ie-panel"><a href="http://windows.microsoft.com/en-US/internet-explorer/"><img src="images/ie8-panel/warning_bar_0000_us.jpg" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today."></a></div>
@@ -108,23 +120,28 @@
                
                 <div class="form-wrap">
                   <label class="form-label" for="nombre">Nombre<span class="req-symbol">*</span></label>
-                  <input class="form-input" id="nombre" type="text" name="nombre" data-constraints="@Required">
+                  <input class="form-input" id="nombre" type="text" name="nombre" pattern="[A-Za-záéíóúÁÉÍÓÚñÑüÜ\s]+" data-constraints="@Required">
+                  <div id="nombre-error" class="error-message">Por favor ingrese un nombre válido (solo letras)</div>
                 </div>
                 <div class="form-wrap">
                   <label class="form-label" for="telefono">Teléfono<span class="req-symbol">*</span></label>
-                  <input class="form-input" id="telefono" type="text" name="telefono" data-constraints="@Required @PhoneNumber">
+                  <input class="form-input" id="telefono" type="tel" name="telefono" pattern="[0-9\+\-\s]+" data-constraints="@Required @PhoneNumber">
+                  <div id="telefono-error" class="error-message">Por favor ingrese un número de teléfono válido (solo números)</div>
                 </div>
                 <div class="form-wrap">
                   <label class="form-label" for="mail">E-Mail<span class="req-symbol">*</span></label>
                   <input class="form-input" id="mail" type="email" name="mail" data-constraints="@Required @Email">
+                  <div id="mail-error" class="error-message">Por favor ingrese una dirección de correo electrónico válida</div>
                 </div>
                
                 <div class="form-wrap">
                   <label class="form-label" for="texto">Texto<span class="req-symbol">*</span></label>
-                  <input class="form-input" id="texto" type="text" name="texto" data-constraints="@Required">
+                  <textarea class="form-input" id="texto" name="texto" rows="4" data-constraints="@Required"></textarea>
+                  <div id="texto-error" class="error-message">Este campo es requerido</div>
                 </div>
                 <div class="form-wrap text-left form-validation-left">
                   <div class="g-recaptcha" data-sitekey="6LfZlSETAAAAAC5VW4R4tQP8Am_to4bM3dddxkEt"></div>
+                  <div id="recaptcha-error" class="error-message">Por favor complete el captcha</div>
                 </div>
                 <div class="form-button group-sm text-center text-lg-left">
                   <button class="button button-primary" type="submit">Enviar</button>
@@ -171,76 +188,146 @@
     
    
    
-    <div class="snackbars" id="form-output-global"></div>
-    <script src="js/core.min.js"></script>
-    <script src="js/script.js"></script>
-    <script>
-      // Código para manejar el envío del formulario
-      document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('contact-form').addEventListener('submit', function(event) {
-          event.preventDefault(); // Prevenir el envío predeterminado del formulario
+      <div class="snackbars" id="form-output-global"></div>
+      <script src="js/core.min.js"></script>
+      <script src="js/script.js"></script>
+      <script>
+        // Código para manejar el envío del formulario
+        document.addEventListener('DOMContentLoaded', function() {
+          const form = document.getElementById('contact-form');
+          const formOutput = document.getElementById('form-output-global');
           
-          // Verificar el captcha
-          var recaptchaResponse = grecaptcha.getResponse();
-          if (recaptchaResponse.length === 0) {
-            alert('Por favor, completa el captcha.');
-            return;
+          // Referencias a campos y mensajes de error
+          const nombreInput = document.getElementById('nombre');
+          const telefonoInput = document.getElementById('telefono');
+          const mailInput = document.getElementById('mail');
+          const textoInput = document.getElementById('texto');
+          
+          const nombreError = document.getElementById('nombre-error');
+          const telefonoError = document.getElementById('telefono-error');
+          const mailError = document.getElementById('mail-error');
+          const textoError = document.getElementById('texto-error');
+          const recaptchaError = document.getElementById('recaptcha-error');
+          
+          // Patrones de validación
+          const nombrePattern = /^[A-Za-záéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+          const telefonoPattern = /^[0-9\+\-\s]+$/;
+          const mailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          
+          // Función para validar campo
+          function validateField(input, pattern, errorElement) {
+            if (!input.value.trim()) {
+              input.classList.add('error');
+              errorElement.textContent = 'Este campo es requerido';
+              errorElement.style.display = 'block';
+              return false;
+            } else if (pattern && !pattern.test(input.value)) {
+              input.classList.add('error');
+              errorElement.style.display = 'block';
+              return false;
+            } else {
+              input.classList.remove('error');
+              errorElement.style.display = 'none';
+              return true;
+            }
           }
           
-          // Obtener valores del formulario
-          var nombre = document.getElementById('nombre').value;
-          var texto = document.getElementById('texto').value;
-          var telefono = document.getElementById('telefono').value;
-          var mail = document.getElementById('mail').value;
+          // Validación en tiempo real
+          nombreInput.addEventListener('input', function() {
+            validateField(nombreInput, nombrePattern, nombreError);
+          });
           
-          // Mostrar indicador de carga
-          const submitButton = document.querySelector('.button-primary');
-          const buttonText = submitButton.textContent;
-          submitButton.textContent = 'Enviando...';
-          submitButton.disabled = true;
+          telefonoInput.addEventListener('input', function() {
+            validateField(telefonoInput, telefonoPattern, telefonoError);
+          });
           
-          // Enviar datos a nuestra API
-          fetch('/api/send-email', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              nombre: nombre,
-              texto: texto,
-              telefono: telefono,
-              mail: mail,
-              recaptchaResponse: recaptchaResponse
-            })
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              console.log('¡ÉXITO!', data);
-              // Mostrar mensaje de éxito y limpiar el formulario
-              document.getElementById('form-output-global').innerHTML = '<div class="snackbar snackbar-success"><span>¡Mensaje enviado correctamente!</span></div>';
-              document.getElementById('form-output-global').style.display = 'block';
-              document.getElementById('contact-form').reset();
-              grecaptcha.reset();
-              submitButton.textContent = buttonText;
-              submitButton.disabled = false;
+          mailInput.addEventListener('input', function() {
+            validateField(mailInput, mailPattern, mailError);
+          });
+          
+          textoInput.addEventListener('input', function() {
+            validateField(textoInput, null, textoError);
+          });
+          
+          // Manejo del envío del formulario
+          form.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevenir el envío predeterminado del formulario
+            
+            // Validar todos los campos
+            const isNombreValid = validateField(nombreInput, nombrePattern, nombreError);
+            const isTelefonoValid = validateField(telefonoInput, telefonoPattern, telefonoError);
+            const isMailValid = validateField(mailInput, mailPattern, mailError);
+            const isTextoValid = validateField(textoInput, null, textoError);
+            
+            // Verificar el captcha
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (recaptchaResponse.length === 0) {
+              recaptchaError.style.display = 'block';
+              return;
             } else {
-              console.log('FALLIDO...', data.error);
-              document.getElementById('form-output-global').innerHTML = '<div class="snackbar snackbar-error"><span>No se pudo enviar el mensaje. Por favor, inténtalo más tarde.</span></div>';
-              document.getElementById('form-output-global').style.display = 'block';
+              recaptchaError.style.display = 'none';
+            }
+            
+            // Verificar si todos los campos son válidos
+            if (!isNombreValid || !isTelefonoValid || !isMailValid || !isTextoValid) {
+              showMessage('Por favor, corrija los errores en el formulario.', 'error');
+              return;
+            }
+            
+            // Mostrar indicador de carga
+            const submitButton = document.querySelector('.button-primary');
+            const buttonText = submitButton.textContent;
+            submitButton.textContent = 'Enviando...';
+            submitButton.disabled = true;
+            
+            try {
+              // Enviar datos a nuestra API
+              const response = await fetch('/api/send-email', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  nombre: nombreInput.value,
+                  texto: textoInput.value,
+                  telefono: telefonoInput.value,
+                  mail: mailInput.value,
+                  recaptchaResponse
+                })
+              });
+              
+              const data = await response.json();
+              
+              if (response.ok && data.success) {
+                console.log('¡ÉXITO!', data);
+                showMessage('¡Mensaje enviado correctamente!', 'success');
+                form.reset();
+                grecaptcha.reset();
+              } else {
+                console.log('FALLIDO...', data.error || 'Error desconocido');
+                showMessage(`No se pudo enviar el mensaje: ${data.error || 'Error desconocido'}`, 'error');
+              }
+            } catch (error) {
+              console.error('Error en la solicitud:', error);
+              showMessage('Error de conexión. Por favor, inténtalo más tarde.', 'error');
+            } finally {
+              // Siempre restaurar el botón
               submitButton.textContent = buttonText;
               submitButton.disabled = false;
             }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('form-output-global').innerHTML = '<div class="snackbar snackbar-error"><span>No se pudo enviar el mensaje. Por favor, inténtalo más tarde.</span></div>';
-            document.getElementById('form-output-global').style.display = 'block';
-            submitButton.textContent = buttonText;
-            submitButton.disabled = false;
           });
+          
+          // Función para mostrar mensajes
+          function showMessage(message, type) {
+            formOutput.innerHTML = `<div class="snackbar snackbar-${type}"><span>${message}</span></div>`;
+            formOutput.style.display = 'block';
+            
+            // Auto ocultar después de 5 segundos
+            setTimeout(() => {
+              formOutput.style.display = 'none';
+            }, 5000);
+          }
         });
-      });
-    </script>
-  </body>
-</html>
+      </script>
+    </body>
+  </html>
