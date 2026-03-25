@@ -67,6 +67,14 @@
 		$window.on( 'scroll', scrollHandler );
 	}
 
+	// Force-hide preloader after 1s max regardless of image load state
+	setTimeout(function () {
+		if (plugins.preloader.length && !plugins.preloader.hasClass('loaded')) {
+			plugins.preloader.addClass('loaded');
+			windowReady = true;
+		}
+	}, 1000);
+
 	// Initialize scripts that require a loaded page
 	$window.on('load', function () {
 		// Page loader & Page transition

@@ -54,3 +54,7 @@ app.post('/api/send-email', async (req, res) => {
     return res.status(500).json({ error: 'Failed to send email' });
   }
 });
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
