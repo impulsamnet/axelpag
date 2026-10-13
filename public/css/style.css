@@ -27,3 +27,29 @@
 .whatsapp-float:hover,.whatsapp-float:focus{color:#fff;transform:scale(1.08);box-shadow:0 6px 18px rgba(0,0,0,.3)}
 .whatsapp-float .fa{font-size:30px;line-height:1}
 .fa-whatsapp:before{content:"\f232"}
+
+/* ===== Tarjetas "Si sentís estas situaciones" ===== */
+.section-soluciones{background:linear-gradient(180deg,#fff 0,#f2f5fa 120px,#f2f5fa calc(100% - 120px),#fff 100%)}
+.card-flip{height:220px;cursor:pointer;outline:0}
+.card-flip .card-back,.card-flip .card-front{height:100%;border-radius:14px;padding:28px 26px;transition:transform .6s cubic-bezier(.4,.2,.2,1),box-shadow .3s ease}
+.card-flip .card-front{flex-direction:column;border:0;background:linear-gradient(135deg,#6580b3 0,#536b98 45%,#3e5281 100%);box-shadow:0 12px 28px rgba(62,82,129,.28);overflow:hidden}
+.card-flip .card-front:before{content:"\201C";position:absolute;top:-18px;left:16px;font-family:Georgia,serif;font-size:110px;line-height:1;color:rgba(255,255,255,.14)}
+.card-flip .card-front p{position:relative;font-size:19px;line-height:1.4}
+.card-hint{position:absolute;left:0;right:0;bottom:16px;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.75);text-align:center}
+.card-hint-icon{display:inline-block;margin-left:4px;font-size:14px;transition:transform .4s ease}
+.card-flip .card-back{flex-direction:column;border:0;border-top:5px solid #536b98;background:#fff;box-shadow:0 14px 32px rgba(44,52,59,.14)}
+.card-label{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#536b98;margin-bottom:10px}
+.card-flip .card-back p{font-size:16px;font-weight:500;line-height:1.5;color:#2c343b}
+@media (hover:hover){
+  .card-flip:hover .card-front{box-shadow:0 18px 36px rgba(62,82,129,.35)}
+  .card-flip:hover .card-hint-icon{transform:rotate(180deg)}
+}
+/* En pantallas táctiles se dan vuelta con un toque (clase .is-flipped), no con hover */
+@media (hover:none){
+  .card-flip:hover .card-front{transform:none}
+  .card-flip:hover .card-back{transform:rotateY(180deg)}
+}
+.card-flip.is-flipped .card-front{transform:rotateY(180deg)}
+.card-flip.is-flipped .card-back{transform:rotateY(0)}
+.card-flip:focus-visible .card-front,.card-flip:focus-visible .card-back{box-shadow:0 0 0 3px #fff,0 0 0 6px #536b98}
+@media (prefers-reduced-motion:reduce){.card-flip .card-back,.card-flip .card-front{transition:none}}

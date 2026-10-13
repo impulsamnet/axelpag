@@ -1096,3 +1096,14 @@
 		}
 	});
 }());
+
+// Tarjetas "Si sentís estas situaciones": dar vuelta con toque o teclado
+document.querySelectorAll('.card-flip').forEach(function (card) {
+	var toggle = function () { card.classList.toggle('is-flipped'); };
+	card.addEventListener('click', function () {
+		if (window.matchMedia('(hover: none)').matches) toggle();
+	});
+	card.addEventListener('keydown', function (e) {
+		if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+	});
+});
