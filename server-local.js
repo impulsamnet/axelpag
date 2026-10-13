@@ -12,8 +12,9 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend (sin RESEND_API_KEY el envío se simula, útil para probar en local)
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+if (!resend) console.warn('RESEND_API_KEY no configurada: los envíos se simulan (no se manda ningún mail)');
 
 // Email API endpoint
 app.post('/api/send-email', async (req, res) => {
@@ -26,6 +27,11 @@ app.post('/api/send-email', async (req, res) => {
     }
     
     console.log('Sending email with data:', { nombre, telefono, mail, texto });
+
+    if (!resend) {
+      await new Promise((r) => setTimeout(r, 800)); // simular la demora del envío
+      return res.status(200).json({ success: true, simulated: true });
+    }
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({

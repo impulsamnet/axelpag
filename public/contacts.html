@@ -30,10 +30,44 @@
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/fonts.css">
     <link rel="stylesheet" href="css/style.css">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+      // En local (localhost) el captcha no funciona: no se carga ni se valida
+      window.IS_LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+      if (!window.IS_LOCAL) {
+        var rc = document.createElement('script');
+        rc.src = 'https://www.google.com/recaptcha/api.js';
+        rc.async = true;
+        rc.defer = true;
+        document.head.appendChild(rc);
+      }
+    </script>
     <style>
       .error-message { color: #dc3545; font-size: 12px; margin-top: 5px; display: none; }
       .form-input.error { border-color: #dc3545; }
+
+      /* Pantalla de éxito al enviar el formulario */
+      .success-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(44, 52, 59, .55); backdrop-filter: blur(3px); opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility .35s ease; }
+      .success-overlay.show { opacity: 1; visibility: visible; }
+      .success-card { width: 100%; max-width: 420px; padding: 40px 30px 30px; border-radius: 12px; background: #fff; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, .25); transform: translateY(20px) scale(.95); transition: transform .45s cubic-bezier(.2, .9, .3, 1.2); }
+      .success-overlay.show .success-card { transform: none; }
+      .success-check { width: 96px; height: 96px; display: block; margin: 0 auto 20px; }
+      .success-check circle { fill: none; stroke: #536b98; stroke-width: 3; stroke-dasharray: 166; stroke-dashoffset: 166; transform: rotate(-90deg); transform-origin: center; }
+      .success-check path { fill: none; stroke: #536b98; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 48; stroke-dashoffset: 48; }
+      .success-overlay.show .success-check circle { animation: success-draw .6s ease-out .2s forwards; }
+      .success-overlay.show .success-check path { animation: success-draw .4s ease-out .75s forwards; }
+      @keyframes success-draw { to { stroke-dashoffset: 0; } }
+      .success-title { font-family: "Poppins", sans-serif; font-size: 26px; font-weight: 500; color: #404044; line-height: 1.3; }
+      .success-text { margin-top: 10px; font-size: 15px; line-height: 1.6; color: #666; }
+      .success-progress { height: 4px; margin: 25px 0 10px; border-radius: 2px; background: #e9edf4; overflow: hidden; }
+      .success-progress span { display: block; height: 100%; width: 0; background: #536b98; }
+      .success-overlay.show .success-progress span { animation: success-progress var(--redirect-ms, 4000ms) linear forwards; }
+      @keyframes success-progress { to { width: 100%; } }
+      .success-redirect { font-size: 13px; color: #888; }
+      .success-redirect a { color: #536b98; font-weight: 600; }
+      @media (prefers-reduced-motion: reduce) {
+        .success-overlay, .success-card { transition: none; }
+        .success-check circle, .success-check path { stroke-dashoffset: 0; animation: none !important; }
+      }
     </style>
   </head>
   <body>
@@ -141,7 +175,7 @@
                   <textarea class="form-input" id="texto" name="texto" rows="4" data-constraints="@Required"></textarea>
                   <div id="texto-error" class="error-message">Este campo es requerido</div>
                 </div>
-                <div class="form-wrap text-left form-validation-left">
+                <div class="form-wrap text-left form-validation-left" id="recaptcha-wrap">
                   <div class="g-recaptcha" data-sitekey="6LdyG-4tAAAAAIUh2YWGk4sUh2aAdOHmNZHBriXZ"></div>
                   <div id="recaptcha-error" class="error-message">Por favor complete el captcha</div>
                 </div>
@@ -191,6 +225,15 @@
    
    
       <div class="snackbars" id="form-output-global"></div>
+      <div class="success-overlay" id="success-overlay" role="dialog" aria-modal="true" aria-labelledby="success-title" aria-hidden="true">
+        <div class="success-card">
+          <svg class="success-check" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="25"/><path d="M14 27l8 8 16-16"/></svg>
+          <div class="success-title" id="success-title">¡Mensaje enviado!</div>
+          <p class="success-text">Gracias por contactarnos. Te vamos a responder a la brevedad.</p>
+          <div class="success-progress"><span></span></div>
+          <p class="success-redirect">Volviendo al inicio en <strong id="success-countdown">4</strong>… <a href="index.html">Ir ahora</a></p>
+        </div>
+      </div>
       <a class="whatsapp-float" href="https://api.whatsapp.com/send?phone=542612051435" target="_blank" rel="noopener noreferrer" aria-label="Escribinos por WhatsApp"><span class="fa fa-whatsapp"></span></a>
       <script src="js/core.min.js"></script>
       <script src="js/script.js"></script>
@@ -211,6 +254,10 @@
           const mailError = document.getElementById('mail-error');
           const textoError = document.getElementById('texto-error');
           const recaptchaError = document.getElementById('recaptcha-error');
+          const isLocal = window.IS_LOCAL;
+
+          // En local no se muestra el captcha
+          if (isLocal) document.getElementById('recaptcha-wrap').style.display = 'none';
           
           // Patrones de validación
           const nombrePattern = /^[A-Za-záéíóúÁÉÍÓÚñÑüÜ\s]+$/;
@@ -262,9 +309,9 @@
             const isMailValid = validateField(mailInput, mailPattern, mailError);
             const isTextoValid = validateField(textoInput, null, textoError);
             
-            // Verificar el captcha
-            const recaptchaResponse = grecaptcha.getResponse();
-            if (recaptchaResponse.length === 0) {
+            // Verificar el captcha (se omite en local)
+            const recaptchaResponse = isLocal ? '' : (window.grecaptcha ? grecaptcha.getResponse() : '');
+            if (!isLocal && recaptchaResponse.length === 0) {
               recaptchaError.style.display = 'block';
               return;
             } else {
@@ -278,7 +325,7 @@
             }
             
             // Mostrar indicador de carga
-            const submitButton = document.querySelector('.button-primary');
+            const submitButton = form.querySelector('button[type="submit"]');
             const buttonText = submitButton.textContent;
             submitButton.textContent = 'Enviando...';
             submitButton.disabled = true;
@@ -302,10 +349,10 @@
               const data = await response.json();
               
               if (response.ok && data.success) {
-                console.log('¡ÉXITO!', data);
-                showMessage('¡Mensaje enviado correctamente!', 'success');
                 form.reset();
-                grecaptcha.reset();
+                if (!isLocal && window.grecaptcha) grecaptcha.reset();
+                showSuccessAndRedirect();
+                return;
               } else {
                 console.log('FALLIDO...', data.error || 'Error desconocido');
                 showMessage(`No se pudo enviar el mensaje: ${data.error || 'Error desconocido'}`, 'error');
@@ -320,9 +367,31 @@
             }
           });
           
+          // Pantalla de éxito con animación y redirección al inicio
+          function showSuccessAndRedirect() {
+            const overlay = document.getElementById('success-overlay');
+            const countdown = document.getElementById('success-countdown');
+            const totalMs = 4000;
+            let seconds = totalMs / 1000;
+            overlay.style.setProperty('--redirect-ms', totalMs + 'ms');
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+            const timer = setInterval(function () {
+              seconds -= 1;
+              if (seconds > 0) countdown.textContent = seconds;
+            }, 1000);
+            setTimeout(function () {
+              clearInterval(timer);
+              window.location.href = 'index.html';
+            }, totalMs);
+          }
+
           // Función para mostrar mensajes
           function showMessage(message, type) {
-            formOutput.innerHTML = `<div class="snackbar snackbar-${type}"><span>${message}</span></div>`;
+            const snackbar = document.createElement('div');
+            snackbar.className = 'snackbar snackbar-' + type;
+            snackbar.appendChild(document.createElement('span')).textContent = message;
+            formOutput.replaceChildren(snackbar);
             formOutput.style.display = 'block';
             
             // Auto ocultar después de 5 segundos
