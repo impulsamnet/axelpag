@@ -30,20 +30,38 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Todos los campos son requeridos' });
     }
 
-    // Opcionalmente validar reCAPTCHA en el servidor
-    // Si deseas implementar esta validación, necesitarás hacer una petición a la API de reCAPTCHA
+    // Validar reCAPTCHA en el servidor (requiere la variable de entorno RECAPTCHA_SECRET_KEY)
+    if (process.env.RECAPTCHA_SECRET_KEY) {
+      if (!recaptchaResponse) {
+        return res.status(400).json({ error: 'Por favor complete el captcha' });
+      }
+      const verify = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ secret: process.env.RECAPTCHA_SECRET_KEY, response: recaptchaResponse }),
+      }).then((r) => r.json());
+      if (!verify.success) {
+        console.warn('reCAPTCHA inválido:', verify['error-codes']);
+        return res.status(400).json({ error: 'No se pudo validar el captcha, intente nuevamente' });
+      }
+    } else {
+      console.warn('RECAPTCHA_SECRET_KEY no configurada: se omite la validación del captcha');
+    }
+
+    // Escapar el contenido del usuario para evitar inyección de HTML en el email
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({
       from: 'Impulsam Website <noreply@impulsam.net>', // Actualiza con tu dominio verificado
       to: 'impulsamnet@gmail.com', // Tu dirección de correo electrónico
-      subject: `Nuevo contacto de ${nombre}`,
+      subject: `Nuevo contacto de ${String(nombre).slice(0, 100)}`,
       html: `
         <h2>Nuevo mensaje desde el formulario de contacto</h2>
-        <p><strong>Nombre:</strong> ${nombre}</p>
-        <p><strong>Teléfono:</strong> ${telefono}</p>
-        <p><strong>Email:</strong> ${mail}</p>
-        <p><strong>Mensaje:</strong> ${texto}</p>
+        <p><strong>Nombre:</strong> ${esc(nombre)}</p>
+        <p><strong>Teléfono:</strong> ${esc(telefono)}</p>
+        <p><strong>Email:</strong> ${esc(mail)}</p>
+        <p><strong>Mensaje:</strong> ${esc(texto).replace(/\n/g, '<br>')}</p>
       `,
       reply_to: mail
     });

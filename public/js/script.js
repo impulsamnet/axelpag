@@ -28,7 +28,8 @@
 			progressLinear:          $( '.progress-linear' ),
 			preloader:               $( '.preloader' ),
 			rdNavbar:                $( '.rd-navbar' ),
-			rdMailForm:              $( '.rd-mailform' ),
+			// #contact-form se envía con su propio script (contacts.html) a /api/send-email
+			rdMailForm:              $( '.rd-mailform' ).not( '#contact-form' ),
 			rdInputLabel:            $( '.form-label' ),
 			regula:                  $( '[data-constraints]' ),
 			search:                  $( '.rd-search' ),
@@ -66,14 +67,6 @@
 		scrollHandler();
 		$window.on( 'scroll', scrollHandler );
 	}
-
-	// Force-hide preloader after 1s max regardless of image load state
-	setTimeout(function () {
-		if (plugins.preloader.length && !plugins.preloader.hasClass('loaded')) {
-			plugins.preloader.addClass('loaded');
-			windowReady = true;
-		}
-	}, 1000);
 
 	// Initialize scripts that require a loaded page
 	$window.on('load', function () {
